@@ -1,5 +1,6 @@
 const initialState = {
-    cartItems: []
+    cartItems: [],
+    totalCartItemsCount: 0
 }
 
  export const reducer = (state = initialState,  action : any) => {
@@ -7,10 +8,7 @@ const initialState = {
         case 'ADD_ITEM_TO_CART': 
             return {
                 ...state,
-                cartItems: [
-                    ...state.cartItems,
-                    action.cartItems
-                ]            
+                cartItems: action.cartItems                     
             }
         case 'GET_ITEMS_FROM_CART': 
             return {
@@ -20,7 +18,12 @@ const initialState = {
             return {
                 ...state,
                 cartItems: []            
-            }           
+            }
+        case 'SET_TOTAL_ITEMS_IN_CART': 
+        return {
+            ...state,
+            totalCartItemsCount: action.totalCartItems         
+        }           
         default : return state        
     }
  }

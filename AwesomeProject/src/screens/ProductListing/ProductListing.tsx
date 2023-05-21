@@ -1,20 +1,23 @@
-import React, { useEffect, useState } from "react"
-import { Alert, FlatList, Dimensions, Image, Pressable, Text, View, ActivityIndicator } from "react-native"
+import React, { useEffect } from "react"
+import { Alert, FlatList, Image, Pressable, Text, View, ActivityIndicator } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { connect } from "react-redux"
+import { connect, useSelector } from "react-redux"
 import { CART_ICON } from "../../assets"
 import { CONSTANT_TEXT, convertHttpToHttps } from "../../common/utils"
 import { actionAddToCart, actionCallProductListApi } from "../../store/action"
 import { Style } from "./ProductListingStyle"
+import { useIsFocused } from "@react-navigation/native"
 
 const ProductListing = (props: any) => {
-    const [productsListing, setProductListing] = useState([])
-    const [cartItems, setCartItems] = useState(props.cartItems?.length)
-    const [isFetching, setIsFetching] = useState(true)
+    const [productsListing, setProductListing] = React.useState([])
+    const [isFetching, setIsFetching] = React.useState(true)
+    const [cartItemCount, setCartItemCount] = React.useState(0)
+    let totalcCrtItemsCount = useSelector((state:any) => state.totalCartItemsCount)
+    const isFocused = useIsFocused();
 
     useEffect(() => {           
-        setCartItems(props.cartItems?.length)
-    },[props.cartItems])
+        setCartItemCount(totalcCrtItemsCount)
+    },[totalcCrtItemsCount, isFocused])
 
     useEffect(() => {
         const param = {
@@ -31,6 +34,28 @@ const ProductListing = (props: any) => {
         props.callProductListingApi(param)
     },[])
 
+    const addProductIntoCart = (item: any) => {
+        let cartItemPresent = props.cartItems
+        const cartItemsPresentWithSameId = props.cartItems.find((cartitem: any) => cartitem.id === item.id)
+        if(cartItemsPresentWithSameId) {
+            cartItemsPresentWithSameId.quantity += 1
+            cartItemsPresentWithSameId.totalPrice = cartItemsPresentWithSameId.quantity * cartItemsPresentWithSameId.price
+            const index = props.cartItems.indexOf(cartItemsPresentWithSameId)
+            cartItemPresent[index] = cartItemsPresentWithSameId    
+        } else {
+            const productItem = {
+                ...item,
+                quantity: 1,
+                totalPrice: item.price              
+            }
+            cartItemPresent = [
+                ...props.cartItems,
+                productItem
+            ]
+        }
+        props.addToCart(cartItemPresent)
+    }
+
     const renderProductItem = (itemData: any) => {
         const {item} = itemData
         const imageUrl = convertHttpToHttps(item.img)
@@ -41,10 +66,12 @@ const ProductListing = (props: any) => {
                     <Text style={Style.productDescriptionStyle}>{item.name}</Text>
                     <Text style={Style.productDescriptionStyle}>${item.price}</Text>
                 </View>
-                <Pressable onPress={() => {
-                        props.addToCart(item)
+                <Pressable 
+                testID="addToCartAction"
+                onPress={() => {
+                        addProductIntoCart(item)
                     }} 
-                    style={Style.addToCartStyle}>
+                    style={({pressed}) => [{opacity: pressed ? 0.5 : 1.0}, Style.addToCartStyle]}>
                     <Text>{CONSTANT_TEXT.ADD_TO_CARD}</Text>
                 </Pressable>
             </View>
@@ -53,12 +80,13 @@ const ProductListing = (props: any) => {
 
     const renderCartView = () => {
         return (
-                <Pressable 
+                <Pressable
+                testID="GoToCart"
                 onPress={()=>
                     props.navigation.navigate('Cart')
                 }
-                style={Style.cartViewStyle}>
-                <Image source={CART_ICON}/>
+                style={({pressed}) => [{opacity: pressed ? 0.5 : 1.0}, Style.cartViewStyle]}>
+                <Image testID="GoToCartImage" source={CART_ICON}/>
             </Pressable>
         )
     }
@@ -66,7 +94,7 @@ const ProductListing = (props: any) => {
     const renderCartItemNumber = () => {
         return (
             <View style={Style.cartItemCountViewStyle}>
-                <Text style={Style.cartItemCountTxtStyle}>{cartItems}</Text>
+                <Text style={Style.cartItemCountTxtStyle}>{cartItemCount}</Text>
             </View>            
         )
     }
@@ -74,13 +102,14 @@ const ProductListing = (props: any) => {
     return (
         <SafeAreaView style={Style.containerStyle}>
             {productsListing.length > 0 ? <FlatList
-                numColumns={2}
+                testID="productListing"
+                numColumns={productsListing.length > 1 ? 2 : 1}
                 style={Style.listingStyle}
                 data={productsListing}
                 renderItem={renderProductItem}
             /> : <></>}
             {productsListing.length > 0 ? renderCartView() : <></>}
-            {cartItems > 0 ? renderCartItemNumber() : <></>}
+            {cartItemCount > 0 ? renderCartItemNumber() : <></>}
             {isFetching ? <ActivityIndicator size={'large'} style={Style.activityIndicatorStyle}/> : <></>}
         </SafeAreaView>
     )

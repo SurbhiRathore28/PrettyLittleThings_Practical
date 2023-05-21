@@ -46,8 +46,8 @@ export const Style = StyleSheet.create({
         marginHorizontal: 10
     },
     itemImageStyle: {
-        width: 100, 
-        height: 100
+        width: 150, 
+        height: 150
     },
     productItemContainer: {
         marginVertical: 10,
@@ -57,5 +57,21 @@ export const Style = StyleSheet.create({
     },
     productItemSubContainer: {
         flexDirection: 'row'
+    },
+    addToCartStyle: {
+        height: 40, 
+        width: 40, 
+        backgroundColor: '#edb3eb', 
+        borderRadius: 5, 
+        justifyContent: 'center', 
+        alignItems: 'center'
+    },
+    deleteFromCartButtonStyle: {
+        height: 40, 
+        width: 40, 
+        backgroundColor: '#dfe6ed', 
+        borderRadius: 5, 
+        justifyContent: 'center', 
+        alignItems: 'center'
     }
 })

@@ -6,3 +6,8 @@ export const CONSTANT_TEXT = {
     SORRY_NO_DATA: 'Sorry No data added in cart',
     PLACE_ORDER: 'Place Order'
 }
+
+export enum CART_ITEM_ACTION  {
+    INCREMENT,
+    DECREMENT
+}
